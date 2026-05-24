@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 import time
 
@@ -103,23 +104,14 @@ async def log_member_kick(member: discord.Member, member_class: str):
 
 async def log_member_join(member: discord.Member):
     delta = relativedelta(member.joined_at, member.created_at)
-    year = "years" if delta.years > 1 else "year"
-    month = "months" if delta.months > 1 else "month"
-    day = "days" if delta.days > 1 else "day"
-    hour = "hours" if delta.hours > 1 else "hour"
-    minute = "minutes" if delta.minutes > 1 else "minute"
-
-    account_age = f"{delta.years} {year}, {delta.months} {month}, {delta.days} {day}"
-
-    if delta.years == 0 and delta.months == 0 and delta.days == 0:
-        account_age = f"{delta.hours} {hour}, {delta.minutes} {minute}"
+    account_age = _format_time(delta)
 
     components = [
         discord.ui.Container(
             discord.ui.Section(
                 discord.ui.TextDisplay(f"### Member joined\n"
                                        f"{member.mention} {member.name}"),
-                discord.ui.TextDisplay(f"**Account Age**\n{account_age}"),
+                discord.ui.TextDisplay(f"**Account age**\n{account_age}"),
                 accessory=discord.ui.Thumbnail(url=member.display_avatar.url)
             ),
             discord.ui.TextDisplay(f"-# ID: {member.id} | <t:{round(time.time())}:t>"),
@@ -132,11 +124,15 @@ async def log_member_join(member: discord.Member):
 
 
 async def log_member_leave(member: discord.Member):
+    delta = relativedelta(datetime.now(), member.created_at)
+    member_since = _format_time(delta)
+
     components = [
         discord.ui.Container(
             discord.ui.Section(
                 discord.ui.TextDisplay("### Member left\n"
                                        f"{member.mention} {member.name}"),
+                discord.ui.TextDisplay(f"**Member since**\n{member_since}"),
                 accessory=discord.ui.Thumbnail(url=member.display_avatar.url),
             ),
             discord.ui.TextDisplay(f"-# ID: {member.id} | <t:{round(time.time())}:t>"),
@@ -176,3 +172,23 @@ def get_gender(member: discord.Member) -> str:
         return "Female"
     else:
         return "undetermined gender"
+
+
+def _format_time(delta: relativedelta) -> str:
+    """
+    Returns the human-formatted time for a time delta
+
+    :param delta: The time delta to print in human-readable form
+    :return: The human-readable time string
+    """
+    year = "years" if delta.years > 1 or delta.years == 0 else "year"
+    month = "months" if delta.months > 1 or delta.months == 0 else "month"
+    day = "days" if delta.days > 1 or delta.days == 0 else "day"
+    hour = "hours" if delta.hours > 1 or delta.hours == 0 else "hour"
+    minute = "minutes" if delta.minutes > 1 or delta.minutes == 0 else "minute"
+
+    delta_string = f"{delta.years} {year}, {delta.months} {month}, {delta.days} {day}"
+
+    if delta.years == 0 and delta.months == 0 and delta.days == 0:  # Only print hours and minutes if less than a day
+        delta_string = f"{delta.hours} {hour}, {delta.minutes} {minute}"
+    return delta_string
