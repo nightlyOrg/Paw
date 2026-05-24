@@ -124,7 +124,7 @@ async def log_member_join(member: discord.Member):
 
 
 async def log_member_leave(member: discord.Member):
-    delta = relativedelta(datetime.now(timezone.utc), member.created_at)
+    delta = relativedelta(datetime.now(timezone.utc), member.joined_at)
     member_since = _format_time(delta)
 
     components = [
