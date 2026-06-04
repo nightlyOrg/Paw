@@ -190,7 +190,6 @@ def _format_time(delta: relativedelta) -> str:
     delta_string = ""
     keep_adding = False
     if delta.years == 0 and delta.months == 0 and delta.days == 0:  # Only print hours and minutes if less than a day
-        delta_string = f"{delta.hours} {hour}, {delta.minutes} {minute}"
         if delta.hours > 0:
             delta_string += f"{delta.hours} {hour}, "
             keep_adding = True
