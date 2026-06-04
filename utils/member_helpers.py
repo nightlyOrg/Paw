@@ -176,7 +176,7 @@ def get_gender(member: discord.Member) -> str:
 
 def _format_time(delta: relativedelta) -> str:
     """
-    Returns the human-formatted time for a time delta
+    Returns the human-formatted time for a time delta, without any 0-values
 
     :param delta: The time delta to print in human-readable form
     :return: The human-readable time string
@@ -187,8 +187,24 @@ def _format_time(delta: relativedelta) -> str:
     hour = "hours" if delta.hours > 1 or delta.hours == 0 else "hour"
     minute = "minutes" if delta.minutes > 1 or delta.minutes == 0 else "minute"
 
-    delta_string = f"{delta.years} {year}, {delta.months} {month}, {delta.days} {day}"
-
+    delta_string = ""
+    keep_adding = False
     if delta.years == 0 and delta.months == 0 and delta.days == 0:  # Only print hours and minutes if less than a day
         delta_string = f"{delta.hours} {hour}, {delta.minutes} {minute}"
+        if delta.hours > 0:
+            delta_string += f"{delta.hours} {hour}, "
+            keep_adding = True
+        if delta.minutes > 0 or keep_adding:
+            delta_string += f"{delta.minutes} {minute}"
+        return delta_string
+
+    if delta.years > 0:
+        delta_string += f"{delta.years} {year}, "
+        keep_adding = True
+    if delta.months > 0 or keep_adding:
+        delta_string += f"{delta.months} {month}, "
+        keep_adding = True
+    if delta.days > 0 or keep_adding:
+        delta_string += f"{delta.days} {day}"
+
     return delta_string
